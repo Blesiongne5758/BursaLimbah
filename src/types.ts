@@ -21,6 +21,8 @@ export interface User {
   province: string;
   isVerified: boolean;
   createdAt: string;
+  npwp?: string;
+  kycStatus?: 'NOT_STARTED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
 }
 
 export interface Listing {

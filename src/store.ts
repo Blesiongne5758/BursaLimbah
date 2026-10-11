@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { User, MembershipTier, ChatMessage } from './types';
 import { MOCK_CHAT_MESSAGES } from './data';
 
-type Page = 'landing' | 'marketplace' | 'listing-detail' | 'dashboard' | 'auth' | 'admin' | 'pricing' | 'terms' | 'privacy';
+type Page = 'landing' | 'marketplace' | 'listing-detail' | 'dashboard' | 'auth' | 'admin' | 'pricing' | 'kyc' | 'payment' | 'terms' | 'privacy';
 
 interface AppState {
   // Navigation
@@ -20,6 +20,7 @@ interface AppState {
   isAuthenticated: boolean;
   currentUser: User | null;
   login: (email: string, password: string) => boolean;
+  setUser: (user: User) => void;
   logout: () => void;
   register: (data: Partial<User>) => void;
 
@@ -94,6 +95,7 @@ export const useStore = create<AppState>((set, get) => ({
     }
     return false;
   },
+  setUser: (user: User) => set({ isAuthenticated: true, currentUser: user }),
   logout: () => set({ isAuthenticated: false, currentUser: null, currentPage: 'landing' }),
   register: (data) => {
     const newUser: User = {
