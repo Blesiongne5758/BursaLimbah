@@ -36,6 +36,8 @@ import { LoadingFallback } from './components/ErrorBoundary';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
 
 export default function App() {
   const { currentPage } = useStore();
@@ -79,17 +81,20 @@ export default function App() {
             transition={{ duration: 0.25 }}
             className="flex-1"
           >
-          {currentPage === 'landing' && <LandingPageInline />}
-          {currentPage === 'marketplace' && <MarketplacePageInline />}
+            <Suspense fallback={<LoadingFallback />}>
+          {currentPage === 'landing' && <LandingPage />}
+          {currentPage === 'marketplace' && <MarketplacePage />}
           {currentPage === 'listing-detail' && <ListingDetailPage />}
           {currentPage === 'dashboard' && <DashboardPage />}
-          {currentPage === 'auth' && <AuthPageInline />}            {currentPage === 'admin' && <AdminPage />}
-            {currentPage === 'pricing' && <PricingPage />}
+          {currentPage === 'auth' && <AuthPage />}
+          {currentPage === 'admin' && <AdminPage />}
+          {currentPage === 'pricing' && <PricingPage />}
             {currentPage === 'kyc' && <KYCPage />}
             {currentPage === 'payment' && <PaymentPage />}
             {currentPage === 'schema' && <SchemaPage />}
             {currentPage === 'terms' && <LegalPage type="terms" />}
             {currentPage === 'privacy' && <LegalPage type="privacy" />}
+            </Suspense>
           </motion.main>
         </AnimatePresence>
         <AIChatWidget />
@@ -690,7 +695,7 @@ function ListingDetailPage() {
 /* ============================================
    DASHBOARD PAGE
    ============================================ */
-function DashboardPage() {
+function DashboardPageInline() {
   const { currentUser } = useStore();
   const featureGate = useFeatureGate();
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'bookings' | 'wallet' | 'reports' | 'settings'>('overview');
@@ -1469,7 +1474,7 @@ function AdminPage() {
 /* ============================================
    PRICING PAGE
    ============================================ */
-function PricingPage() {
+function PricingPageInline() {
   const { setPage } = useStore();
   const plans = [
     { name: 'Personal', price: 'Gratis', desc: 'Untuk individu dan pemula', features: ['5 listing aktif', '20 negosiasi/bulan', 'AI Chat (basic)', 'Escrow protection', 'Rating & review'], cta: 'Mulai Gratis', highlighted: false },
