@@ -2,9 +2,15 @@
  * BursaLimbah.com - Main Application
  * B2B & B2C Marketplace for waste trading in Indonesia
  * Architecture: Client → Services (Auth, Payment, AI, Shipping) → Data Layer
+ * 
+ * REFACTORING STATUS:
+ * ✅ LandingPage - Extracted to src/pages/LandingPage.tsx
+ * ✅ MarketplacePage - Extracted to src/pages/MarketplacePage.tsx
+ * ✅ AuthPage - Extracted to src/pages/AuthPage.tsx
+ * 🔄 Other pages - Still inline (will be extracted in next iteration)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useStore, useFeatureGate } from './store';
 import { MOCK_LISTINGS, MOCK_TRANSACTIONS, formatRupiah, formatNumber } from './data';
 import { WASTE_CATEGORIES, TRANSACTION_STATUS_COLORS, LISTING_STATUS_COLORS, PRISMA_SCHEMA, type WasteCategory, type Listing, type TransactionStatus } from './types';
@@ -24,6 +30,12 @@ import { AuthService, PaymentService, ShippingService, AIAgentService, LocationS
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SEO, PreloadResources, Analytics } from './components/SEO';
 import { useFilteredListings } from './hooks';
+import { LoadingFallback } from './components/ErrorBoundary';
+
+// Lazy load pages for code splitting
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
 
 export default function App() {
   const { currentPage } = useStore();
@@ -67,12 +79,11 @@ export default function App() {
             transition={{ duration: 0.25 }}
             className="flex-1"
           >
-            {currentPage === 'landing' && <LandingPage />}
-            {currentPage === 'marketplace' && <MarketplacePage />}
-            {currentPage === 'listing-detail' && <ListingDetailPage />}
-            {currentPage === 'dashboard' && <DashboardPage />}
-            {currentPage === 'auth' && <AuthPage />}
-            {currentPage === 'admin' && <AdminPage />}
+          {currentPage === 'landing' && <LandingPageInline />}
+          {currentPage === 'marketplace' && <MarketplacePageInline />}
+          {currentPage === 'listing-detail' && <ListingDetailPage />}
+          {currentPage === 'dashboard' && <DashboardPage />}
+          {currentPage === 'auth' && <AuthPageInline />}            {currentPage === 'admin' && <AdminPage />}
             {currentPage === 'pricing' && <PricingPage />}
             {currentPage === 'kyc' && <KYCPage />}
             {currentPage === 'payment' && <PaymentPage />}
@@ -187,7 +198,7 @@ function NavLink({ children, active, onClick }: { children: React.ReactNode; act
 /* ============================================
    LANDING PAGE
    ============================================ */
-function LandingPage() {
+function LandingPageInline() {
   const { setPage } = useStore();
 
   return (
@@ -439,7 +450,7 @@ function HeroVisual() {
 /* ============================================
    MARKETPLACE PAGE
    ============================================ */
-function MarketplacePage() {
+function MarketplacePageInline() {
   const { setPage, setSelectedListing } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | 'ALL'>('ALL');
@@ -1016,7 +1027,7 @@ function DashboardSettings() {
 /* ============================================
    AUTH PAGE
    ============================================ */
-function AuthPage() {
+function AuthPageInline() {
   const { login, setUser, register, setPage } = useStore();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
