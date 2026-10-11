@@ -21,39 +21,70 @@ import {
 } from 'lucide-react';
 import { Card, Badge, Button, Alert, ProgressStepper, MapPlaceholder, TransactionTimeline, StatCard, EmptyState, Skeleton } from './components/ui';
 import { AuthService, PaymentService, ShippingService, AIAgentService, LocationService, KYCService } from './services';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { SEO, PreloadResources, Analytics } from './components/SEO';
+import { useFilteredListings } from './hooks';
 
 export default function App() {
   const { currentPage } = useStore();
 
+  // SEO configuration per page
+  const seoConfig: Record<string, { title: string; description: string }> = {
+    landing: { title: 'Marketplace Limbah Terpercaya Indonesia', description: 'Jual beli limbah plastik, kertas, logam, elektronik dengan aman. Escrow payment, AI assistant, enkripsi lokasi.' },
+    marketplace: { title: 'Marketplace', description: 'Temukan ribuan listing limbah dari seluruh Indonesia. Filter berdasarkan kategori, lokasi, dan harga.' },
+    'listing-detail': { title: 'Detail Listing', description: 'Detail listing limbah dengan informasi lengkap, lokasi, dan opsi negosiasi.' },
+    dashboard: { title: 'Dashboard', description: 'Kelola listing, booking, wallet, dan laporan transaksi Anda.' },
+    auth: { title: 'Masuk / Daftar', description: 'Masuk atau daftar akun baru untuk mulai bertransaksi limbah.' },
+    admin: { title: 'Admin Panel', description: 'Panel administrasi untuk mengelola platform BursaLimbah.' },
+    pricing: { title: 'Harga & Paket', description: 'Pilih paket membership yang sesuai dengan bisnis Anda.' },
+    kyc: { title: 'Verifikasi KYC', description: 'Lengkapi verifikasi identitas untuk mengakses fitur lengkap.' },
+    payment: { title: 'Pembayaran', description: 'Proses pembayaran dengan escrow yang aman.' },
+    schema: { title: 'Database Schema', description: 'Visualisasi skema database PostgreSQL BursaLimbah.' },
+    terms: { title: 'Syarat & Ketentuan', description: 'Syarat dan ketentuan penggunaan platform BursaLimbah.' },
+    privacy: { title: 'Kebijakan Privasi', description: 'Kebijakan privasi compliant dengan UU PDP No. 27/2023.' },
+  };
+
+  const currentSEO = seoConfig[currentPage] || seoConfig.landing;
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
-      <AnimatePresence mode="wait">
-        <motion.main
-          key={currentPage}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-          className="flex-1"
-        >
-          {currentPage === 'landing' && <LandingPage />}
-          {currentPage === 'marketplace' && <MarketplacePage />}
-          {currentPage === 'listing-detail' && <ListingDetailPage />}
-          {currentPage === 'dashboard' && <DashboardPage />}
-          {currentPage === 'auth' && <AuthPage />}
-          {currentPage === 'admin' && <AdminPage />}
-          {currentPage === 'pricing' && <PricingPage />}
-          {currentPage === 'kyc' && <KYCPage />}
-          {currentPage === 'payment' && <PaymentPage />}
-          {currentPage === 'schema' && <SchemaPage />}
-          {currentPage === 'terms' && <LegalPage type="terms" />}
-          {currentPage === 'privacy' && <LegalPage type="privacy" />}
-        </motion.main>
-      </AnimatePresence>
-      <AIChatWidget />
-      <Footer />
-    </div>
+    <ErrorBoundary>
+      <SEO
+        title={currentSEO.title}
+        description={currentSEO.description}
+        keywords={['limbah', 'daur ulang', 'marketplace', 'B2B', 'B2C', 'Indonesia', 'escrow', 'plastik', 'kertas', 'logam']}
+        url={`https://bursalimbah.com/${currentPage === 'landing' ? '' : currentPage}`}
+      />
+      <PreloadResources />
+      <Analytics />
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Navbar />
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={currentPage}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            className="flex-1"
+          >
+            {currentPage === 'landing' && <LandingPage />}
+            {currentPage === 'marketplace' && <MarketplacePage />}
+            {currentPage === 'listing-detail' && <ListingDetailPage />}
+            {currentPage === 'dashboard' && <DashboardPage />}
+            {currentPage === 'auth' && <AuthPage />}
+            {currentPage === 'admin' && <AdminPage />}
+            {currentPage === 'pricing' && <PricingPage />}
+            {currentPage === 'kyc' && <KYCPage />}
+            {currentPage === 'payment' && <PaymentPage />}
+            {currentPage === 'schema' && <SchemaPage />}
+            {currentPage === 'terms' && <LegalPage type="terms" />}
+            {currentPage === 'privacy' && <LegalPage type="privacy" />}
+          </motion.main>
+        </AnimatePresence>
+        <AIChatWidget />
+        <Footer />
+      </div>
+    </ErrorBoundary>
   );
 }
 
@@ -414,15 +445,8 @@ function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | 'ALL'>('ALL');
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high'>('newest');
 
-  const filteredListings = MOCK_LISTINGS.filter(l => {
-    if (selectedCategory !== 'ALL' && l.category !== selectedCategory) return false;
-    if (searchQuery && !l.title.toLowerCase().includes(searchQuery.toLowerCase()) && !l.city.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  }).sort((a, b) => {
-    if (sortBy === 'price_low') return a.pricePerKg - b.pricePerKg;
-    if (sortBy === 'price_high') return b.pricePerKg - a.pricePerKg;
-    return 0;
-  });
+  // Use optimized hook with memoization and debouncing
+  const { filteredListings, total } = useFilteredListings(searchQuery, selectedCategory, sortBy);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
