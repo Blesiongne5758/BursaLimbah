@@ -2,9 +2,15 @@
  * BursaLimbah.com - Main Application
  * B2B & B2C Marketplace for waste trading in Indonesia
  * Architecture: Client → Services (Auth, Payment, AI, Shipping) → Data Layer
+ * 
+ * REFACTORING STATUS:
+ * ✅ LandingPage - Extracted to src/pages/LandingPage.tsx
+ * ✅ MarketplacePage - Extracted to src/pages/MarketplacePage.tsx
+ * ✅ AuthPage - Extracted to src/pages/AuthPage.tsx
+ * 🔄 Other pages - Still inline (will be extracted in next iteration)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useStore, useFeatureGate } from './store';
 import { MOCK_LISTINGS, MOCK_TRANSACTIONS, formatRupiah, formatNumber } from './data';
 import { WASTE_CATEGORIES, TRANSACTION_STATUS_COLORS, LISTING_STATUS_COLORS, PRISMA_SCHEMA, type WasteCategory, type Listing, type TransactionStatus } from './types';
@@ -21,39 +27,82 @@ import {
 } from 'lucide-react';
 import { Card, Badge, Button, Alert, ProgressStepper, MapPlaceholder, TransactionTimeline, StatCard, EmptyState, Skeleton } from './components/ui';
 import { AuthService, PaymentService, ShippingService, AIAgentService, LocationService, KYCService } from './services';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { SEO, PreloadResources, Analytics } from './components/SEO';
+import { useFilteredListings } from './hooks';
+import { LoadingFallback } from './components/ErrorBoundary';
+
+// Lazy load pages for code splitting
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const KYCPage = lazy(() => import('./pages/KYCPage'));
 
 export default function App() {
   const { currentPage } = useStore();
 
+  // SEO configuration per page
+  const seoConfig: Record<string, { title: string; description: string }> = {
+    landing: { title: 'Marketplace Limbah Terpercaya Indonesia', description: 'Jual beli limbah plastik, kertas, logam, elektronik dengan aman. Escrow payment, AI assistant, enkripsi lokasi.' },
+    marketplace: { title: 'Marketplace', description: 'Temukan ribuan listing limbah dari seluruh Indonesia. Filter berdasarkan kategori, lokasi, dan harga.' },
+    'listing-detail': { title: 'Detail Listing', description: 'Detail listing limbah dengan informasi lengkap, lokasi, dan opsi negosiasi.' },
+    dashboard: { title: 'Dashboard', description: 'Kelola listing, booking, wallet, dan laporan transaksi Anda.' },
+    auth: { title: 'Masuk / Daftar', description: 'Masuk atau daftar akun baru untuk mulai bertransaksi limbah.' },
+    admin: { title: 'Admin Panel', description: 'Panel administrasi untuk mengelola platform BursaLimbah.' },
+    pricing: { title: 'Harga & Paket', description: 'Pilih paket membership yang sesuai dengan bisnis Anda.' },
+    kyc: { title: 'Verifikasi KYC', description: 'Lengkapi verifikasi identitas untuk mengakses fitur lengkap.' },
+    payment: { title: 'Pembayaran', description: 'Proses pembayaran dengan escrow yang aman.' },
+    schema: { title: 'Database Schema', description: 'Visualisasi skema database PostgreSQL BursaLimbah.' },
+    terms: { title: 'Syarat & Ketentuan', description: 'Syarat dan ketentuan penggunaan platform BursaLimbah.' },
+    privacy: { title: 'Kebijakan Privasi', description: 'Kebijakan privasi compliant dengan UU PDP No. 27/2023.' },
+  };
+
+  const currentSEO = seoConfig[currentPage] || seoConfig.landing;
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
-      <AnimatePresence mode="wait">
-        <motion.main
-          key={currentPage}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-          className="flex-1"
-        >
+    <ErrorBoundary>
+      <SEO
+        title={currentSEO.title}
+        description={currentSEO.description}
+        keywords={['limbah', 'daur ulang', 'marketplace', 'B2B', 'B2C', 'Indonesia', 'escrow', 'plastik', 'kertas', 'logam']}
+        url={`https://bursalimbah.com/${currentPage === 'landing' ? '' : currentPage}`}
+      />
+      <PreloadResources />
+      <Analytics />
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Navbar />
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={currentPage}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            className="flex-1"
+          >
+            <Suspense fallback={<LoadingFallback />}>
           {currentPage === 'landing' && <LandingPage />}
           {currentPage === 'marketplace' && <MarketplacePage />}
-          {currentPage === 'listing-detail' && <ListingDetailPage />}
+          {currentPage === 'listing-detail' && <ListingDetailPageInline />}
           {currentPage === 'dashboard' && <DashboardPage />}
           {currentPage === 'auth' && <AuthPage />}
-          {currentPage === 'admin' && <AdminPage />}
+          {currentPage === 'admin' && <AdminPageInline />}
           {currentPage === 'pricing' && <PricingPage />}
-          {currentPage === 'kyc' && <KYCPage />}
-          {currentPage === 'payment' && <PaymentPage />}
-          {currentPage === 'schema' && <SchemaPage />}
-          {currentPage === 'terms' && <LegalPage type="terms" />}
-          {currentPage === 'privacy' && <LegalPage type="privacy" />}
-        </motion.main>
-      </AnimatePresence>
-      <AIChatWidget />
-      <Footer />
-    </div>
+          {currentPage === 'kyc' && <KYCPageInline />}            {currentPage === 'payment' && <PaymentPage />}
+            {currentPage === 'schema' && <SchemaPage />}
+            {currentPage === 'terms' && <LegalPage type="terms" />}
+            {currentPage === 'privacy' && <LegalPage type="privacy" />}
+            </Suspense>
+          </motion.main>
+        </AnimatePresence>
+        <AIChatWidget />
+        <Footer />
+      </div>
+    </ErrorBoundary>
   );
 }
 
@@ -156,7 +205,7 @@ function NavLink({ children, active, onClick }: { children: React.ReactNode; act
 /* ============================================
    LANDING PAGE
    ============================================ */
-function LandingPage() {
+function LandingPageInline() {
   const { setPage } = useStore();
 
   return (
@@ -408,21 +457,14 @@ function HeroVisual() {
 /* ============================================
    MARKETPLACE PAGE
    ============================================ */
-function MarketplacePage() {
+function MarketplacePageInline() {
   const { setPage, setSelectedListing } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<WasteCategory | 'ALL'>('ALL');
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high'>('newest');
 
-  const filteredListings = MOCK_LISTINGS.filter(l => {
-    if (selectedCategory !== 'ALL' && l.category !== selectedCategory) return false;
-    if (searchQuery && !l.title.toLowerCase().includes(searchQuery.toLowerCase()) && !l.city.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  }).sort((a, b) => {
-    if (sortBy === 'price_low') return a.pricePerKg - b.pricePerKg;
-    if (sortBy === 'price_high') return b.pricePerKg - a.pricePerKg;
-    return 0;
-  });
+  // Use optimized hook with memoization and debouncing
+  const { filteredListings, total } = useFilteredListings(searchQuery, selectedCategory, sortBy);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -509,7 +551,7 @@ function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => vo
 /* ============================================
    LISTING DETAIL PAGE
    ============================================ */
-function ListingDetailPage() {
+function ListingDetailPageInline() {
   const { selectedListingId, setPage, isAuthenticated } = useStore();
   const listing = MOCK_LISTINGS.find(l => l.id === selectedListingId) || MOCK_LISTINGS[0];
   const cat = WASTE_CATEGORIES[listing.category];
@@ -655,7 +697,7 @@ function ListingDetailPage() {
 /* ============================================
    DASHBOARD PAGE
    ============================================ */
-function DashboardPage() {
+function DashboardPageInline() {
   const { currentUser } = useStore();
   const featureGate = useFeatureGate();
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'bookings' | 'wallet' | 'reports' | 'settings'>('overview');
@@ -992,7 +1034,7 @@ function DashboardSettings() {
 /* ============================================
    AUTH PAGE
    ============================================ */
-function AuthPage() {
+function AuthPageInline() {
   const { login, setUser, register, setPage } = useStore();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -1223,7 +1265,7 @@ function PaymentPage() {
 /* ============================================
    KYC PAGE
    ============================================ */
-function KYCPage() {
+function KYCPageInline() {
   const { setPage } = useStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -1353,7 +1395,7 @@ function KYCPage() {
 /* ============================================
    ADMIN PAGE
    ============================================ */
-function AdminPage() {
+function AdminPageInline() {
   const { setPage } = useStore();
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1434,7 +1476,7 @@ function AdminPage() {
 /* ============================================
    PRICING PAGE
    ============================================ */
-function PricingPage() {
+function PricingPageInline() {
   const { setPage } = useStore();
   const plans = [
     { name: 'Personal', price: 'Gratis', desc: 'Untuk individu dan pemula', features: ['5 listing aktif', '20 negosiasi/bulan', 'AI Chat (basic)', 'Escrow protection', 'Rating & review'], cta: 'Mulai Gratis', highlighted: false },
