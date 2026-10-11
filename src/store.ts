@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { User, MembershipTier, ChatMessage } from './types';
 import { MOCK_CHAT_MESSAGES } from './data';
 
-type Page = 'landing' | 'marketplace' | 'listing-detail' | 'dashboard' | 'auth' | 'admin' | 'pricing' | 'kyc' | 'payment' | 'terms' | 'privacy';
+type Page = 'landing' | 'marketplace' | 'listing-detail' | 'dashboard' | 'auth' | 'admin' | 'pricing' | 'kyc' | 'payment' | 'schema' | 'terms' | 'privacy';
 
 interface AppState {
   // Navigation
@@ -51,40 +51,22 @@ export const useStore = create<AppState>((set, get) => ({
     // Simulated login
     const mockUsers: Record<string, User> = {
       'budi@plastikjaya.com': {
-        id: 'u1',
-        name: 'Budi Santoso',
-        email: 'budi@plastikjaya.com',
-        phone: '+62 812-3456-7890',
-        role: 'SELLER',
-        membershipTier: 'SMALL_BUSINESS',
-        city: 'Surabaya',
-        province: 'Jawa Timur',
-        isVerified: true,
-        createdAt: '2024-01-15',
+        id: 'u1', name: 'Budi Santoso', email: 'budi@plastikjaya.com',
+        phone: '+62 812-3456-7890', role: 'SELLER', membershipTier: 'SMALL_BUSINESS',
+        kycStatus: 'VERIFIED', city: 'Surabaya', province: 'Jawa Timur',
+        isVerified: true, createdAt: '2024-01-15',
       },
       'siti@greencycle.id': {
-        id: 'u2',
-        name: 'Siti Rahayu',
-        email: 'siti@greencycle.id',
-        phone: '+62 813-9876-5432',
-        role: 'BUYER',
-        membershipTier: 'CORPORATE',
-        city: 'Jakarta',
-        province: 'DKI Jakarta',
-        isVerified: true,
-        createdAt: '2024-02-20',
+        id: 'u2', name: 'Siti Rahayu', email: 'siti@greencycle.id',
+        phone: '+62 813-9876-5432', role: 'BUYER', membershipTier: 'CORPORATE',
+        kycStatus: 'VERIFIED', city: 'Jakarta', province: 'DKI Jakarta',
+        isVerified: true, createdAt: '2024-02-20',
       },
       'admin@bursalimbah.com': {
-        id: 'admin',
-        name: 'Admin BursaLimbah',
-        email: 'admin@bursalimbah.com',
-        phone: '+62 21-5555-0000',
-        role: 'ADMIN',
-        membershipTier: 'CORPORATE',
-        city: 'Jakarta',
-        province: 'DKI Jakarta',
-        isVerified: true,
-        createdAt: '2024-01-01',
+        id: 'admin', name: 'Admin BursaLimbah', email: 'admin@bursalimbah.com',
+        phone: '+62 21-5555-0000', role: 'ADMIN', membershipTier: 'CORPORATE',
+        kycStatus: 'VERIFIED', city: 'Jakarta', province: 'DKI Jakarta',
+        isVerified: true, createdAt: '2024-01-01',
       },
     };
 
@@ -105,6 +87,7 @@ export const useStore = create<AppState>((set, get) => ({
       phone: data.phone || '',
       role: 'USER',
       membershipTier: 'PERSONAL',
+      kycStatus: 'PENDING',
       city: data.city || '',
       province: data.province || '',
       isVerified: false,

@@ -4,7 +4,7 @@
  * In production, these would be Next.js API Routes + tRPC
  */
 
-import { Listing, Transaction, User, MembershipTier, WasteCategory, TransactionStatus } from '../types';
+import { Listing, Booking, User, MembershipTier, WasteCategory, TransactionStatus } from '../types';
 import { MOCK_LISTINGS, MOCK_TRANSACTIONS } from '../data';
 
 /* ============================================
@@ -28,13 +28,13 @@ export const AuthService = {
         id: 'u1', name: 'Budi Santoso', email: 'budi@plastikjaya.com',
         phone: '+62 812-3456-7890', role: 'SELLER', membershipTier: 'SMALL_BUSINESS',
         city: 'Surabaya', province: 'Jawa Timur', isVerified: true, createdAt: '2024-01-15',
-        npwp: '01.234.567.8-901.000', kycStatus: 'VERIFIED',
+        kycStatus: 'VERIFIED',
       },
       'siti@greencycle.id': {
         id: 'u2', name: 'Siti Rahayu', email: 'siti@greencycle.id',
         phone: '+62 813-9876-5432', role: 'BUYER', membershipTier: 'CORPORATE',
         city: 'Jakarta', province: 'DKI Jakarta', isVerified: true, createdAt: '2024-02-20',
-        npwp: '02.345.678.9-012.000', kycStatus: 'VERIFIED',
+        kycStatus: 'VERIFIED',
       },
       'ahmad@personal.com': {
         id: 'u3', name: 'Ahmad Wijaya', email: 'ahmad@personal.com',
@@ -77,7 +77,7 @@ export const AuthService = {
       province: data.province || '',
       isVerified: false,
       createdAt: new Date().toISOString(),
-      kycStatus: 'NOT_STARTED',
+      kycStatus: 'PENDING',
     };
   },
 
