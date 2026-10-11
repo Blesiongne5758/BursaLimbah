@@ -38,6 +38,9 @@ const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
+const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const KYCPage = lazy(() => import('./pages/KYCPage'));
 
 export default function App() {
   const { currentPage } = useStore();
@@ -84,13 +87,12 @@ export default function App() {
             <Suspense fallback={<LoadingFallback />}>
           {currentPage === 'landing' && <LandingPage />}
           {currentPage === 'marketplace' && <MarketplacePage />}
-          {currentPage === 'listing-detail' && <ListingDetailPage />}
+          {currentPage === 'listing-detail' && <ListingDetailPageInline />}
           {currentPage === 'dashboard' && <DashboardPage />}
           {currentPage === 'auth' && <AuthPage />}
-          {currentPage === 'admin' && <AdminPage />}
+          {currentPage === 'admin' && <AdminPageInline />}
           {currentPage === 'pricing' && <PricingPage />}
-            {currentPage === 'kyc' && <KYCPage />}
-            {currentPage === 'payment' && <PaymentPage />}
+          {currentPage === 'kyc' && <KYCPageInline />}            {currentPage === 'payment' && <PaymentPage />}
             {currentPage === 'schema' && <SchemaPage />}
             {currentPage === 'terms' && <LegalPage type="terms" />}
             {currentPage === 'privacy' && <LegalPage type="privacy" />}
@@ -549,7 +551,7 @@ function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => vo
 /* ============================================
    LISTING DETAIL PAGE
    ============================================ */
-function ListingDetailPage() {
+function ListingDetailPageInline() {
   const { selectedListingId, setPage, isAuthenticated } = useStore();
   const listing = MOCK_LISTINGS.find(l => l.id === selectedListingId) || MOCK_LISTINGS[0];
   const cat = WASTE_CATEGORIES[listing.category];
@@ -1263,7 +1265,7 @@ function PaymentPage() {
 /* ============================================
    KYC PAGE
    ============================================ */
-function KYCPage() {
+function KYCPageInline() {
   const { setPage } = useStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -1393,7 +1395,7 @@ function KYCPage() {
 /* ============================================
    ADMIN PAGE
    ============================================ */
-function AdminPage() {
+function AdminPageInline() {
   const { setPage } = useStore();
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
