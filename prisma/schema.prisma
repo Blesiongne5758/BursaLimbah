@@ -1,0 +1,296 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  USER
+  SELLER
+  BUYER
+  ADMIN
+}
+
+enum Tier {
+  PERSONAL
+  SMALL_BUSINESS
+  CORPORATE
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum WasteCategory {
+  PLASTIC
+  PAPER
+  METAL
+  ELECTRONIC
+  ORGANIC
+  B3
+  INDUSTRIAL
+  TEXTILE
+  CONSTRUCTION
+}
+
+enum ListingStatus {
+  DRAFT
+  PUBLISHED
+  NEGOTIATING
+  SOLD
+  ARCHIVED
+}
+
+enum EscrowStatus {
+  PENDING
+  HOLD
+  RELEASED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  MIDTRANS
+  XENDIT
+  BANK_TRANSFER
+}
+
+enum PickupMethod {
+  SELF
+  COURIER
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  phone           String?
+  passwordHash    String
+  name            String
+  role            Role      @default(USER)
+  membershipTier  Tier      @default(PERSONAL)
+  kycStatus       KYCStatus @default(PENDING)
+  
+  // Relations
+  companyInfo     CompanyInfo?
+  listings        Listing[]
+  bookings        Booking[]  @relation("BuyerBookings")
+  sellerBookings  Booking[]  @relation("SellerBookings")
+  conversations   ConversationParticipant[]
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@index([membershipTier])
+}
+
+model CompanyInfo {
+  userId          String  @id
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName     String
+  npwp            String?
+  nib             String?
+  businessLicense String?
+  industrySector  String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Listing {
+  id              String        @id @default(cuid())
+  sellerId        String
+  seller          User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  
+  // Listing details
+  category        WasteCategory
+  subCategory     String
+  title           String
+  description     String
+  quantity        Float
+  unit            String        // kg, ton, liter, etc
+  basePrice       Decimal
+  negotiable      Boolean       @default(true)
+  
+  // Location (privacy protected)
+  city            String
+  province        String
+  encryptedCoords String        // AES-256-GCM encrypted lat/lng
+  locationHash    String        // SHA-256 hash for verification
+  
+  // Status
+  status          ListingStatus @default(DRAFT)
+  aiGenerated     Boolean       @default(false)
+  
+  // Relations
+  bookings        Booking[]
+  
+  // Timestamps
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([sellerId])
+  @@index([category])
+  @@index([status])
+  @@index([city])
+  @@index([createdAt])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  
+  // Relations
+  listingId       String
+  listing         Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId         String
+  buyer           User          @relation("BuyerBookings", fields: [buyerId], references: [id])
+  sellerId        String
+  seller          User          @relation("SellerBookings", fields: [sellerId], references: [id])
+  
+  // Booking details
+  quantity        Float
+  pricePerKg      Decimal
+  totalPrice      Decimal
+  downPayment     Decimal
+  finalPrice      Decimal?
+  
+  // Payment
+  paymentMethod   PaymentMethod
+  escrowStatus    EscrowStatus  @default(PENDING)
+  pickupMethod    PickupMethod
+  courierId       String?
+  
+  // Dates
+  pickupDate      DateTime
+  estimatedPickup DateTime?
+  
+  // Validation
+  validation      Validation?
+  
+  // Timestamps
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([listingId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([escrowStatus])
+  @@index([createdAt])
+}
+
+model Validation {
+  bookingId       String   @id
+  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  
+  actualQuantity  Float
+  actualPhotos    String[] // Cloudinary URLs
+  finalPrice      Decimal
+  conditionNotes  String?
+  
+  validatedById   String
+  validatedAt     DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([bookingId])
+}
+
+model Conversation {
+  id              String   @id @default(cuid())
+  
+  // Relations
+  participants    ConversationParticipant[]
+  messages        Message[]
+  
+  // AI Agent
+  aiAgent         Boolean  @default(false)
+  context         Json?    // listingId, bookingId, etc
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([aiAgent])
+}
+
+model ConversationParticipant {
+  userId          String
+  conversationId  String
+  
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  joinedAt        DateTime @default(now())
+
+  @@id([userId, conversationId])
+  @@index([userId])
+  @@index([conversationId])
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  
+  // Relations
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId        String?
+  
+  // Message content
+  isAI            Boolean  @default(false)
+  content         String
+  toolCalls       Json?    // AI function call results
+  
+  // Read status
+  read            Boolean  @default(false)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+// ============================================
+// AUDIT LOG (for compliance)
+// ============================================
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  
+  userId          String?
+  action          String   // CREATE, UPDATE, DELETE, LOGIN, etc
+  resource        String   // User, Listing, Booking, etc
+  resourceId      String?
+  
+  metadata        Json?    // Additional context
+  
+  ipAddress       String?
+  userAgent       String?
+  
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}
