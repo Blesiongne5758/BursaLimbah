@@ -41,6 +41,14 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const KYCPage = lazy(() => import('./pages/KYCPage'));
+const PaymentPage = lazy(() => import('./pages/PaymentPage'));
+const SchemaPage = lazy(() => import('./pages/SchemaPage'));
+const LegalPage = lazy(() => import('./pages/LegalPage'));
+
+// Lazy load shared components
+const Navbar = lazy(() => import('./components/Navbar'));
+const Footer = lazy(() => import('./components/Footer'));
+const AIChatWidget = lazy(() => import('./components/AIChatWidget'));
 
 export default function App() {
   const { currentPage } = useStore();
@@ -85,17 +93,18 @@ export default function App() {
             className="flex-1"
           >
             <Suspense fallback={<LoadingFallback />}>
-          {currentPage === 'landing' && <LandingPage />}
-          {currentPage === 'marketplace' && <MarketplacePage />}
-          {currentPage === 'listing-detail' && <ListingDetailPageInline />}
-          {currentPage === 'dashboard' && <DashboardPage />}
-          {currentPage === 'auth' && <AuthPage />}
-          {currentPage === 'admin' && <AdminPageInline />}
-          {currentPage === 'pricing' && <PricingPage />}
-          {currentPage === 'kyc' && <KYCPageInline />}            {currentPage === 'payment' && <PaymentPage />}
-            {currentPage === 'schema' && <SchemaPage />}
-            {currentPage === 'terms' && <LegalPage type="terms" />}
-            {currentPage === 'privacy' && <LegalPage type="privacy" />}
+              {currentPage === 'landing' && <LandingPage />}
+              {currentPage === 'marketplace' && <MarketplacePage />}
+              {currentPage === 'listing-detail' && <ListingDetailPage />}
+              {currentPage === 'dashboard' && <DashboardPage />}
+              {currentPage === 'auth' && <AuthPage />}
+              {currentPage === 'admin' && <AdminPage />}
+              {currentPage === 'pricing' && <PricingPage />}
+              {currentPage === 'kyc' && <KYCPage />}
+              {currentPage === 'payment' && <PaymentPage />}
+              {currentPage === 'schema' && <SchemaPage />}
+              {currentPage === 'terms' && <LegalPage type="terms" />}
+              {currentPage === 'privacy' && <LegalPage type="privacy" />}
             </Suspense>
           </motion.main>
         </AnimatePresence>
@@ -109,7 +118,7 @@ export default function App() {
 /* ============================================
    NAVBAR
    ============================================ */
-function Navbar() {
+function NavbarInline() {
   const { currentPage, setPage, isAuthenticated, currentUser, logout, mobileMenuOpen, setMobileMenuOpen } = useStore();
 
   return (
@@ -1139,7 +1148,7 @@ function AuthPageInline() {
 /* ============================================
    PAYMENT PAGE
    ============================================ */
-function PaymentPage() {
+function PaymentPageInline() {
   const { setPage } = useStore();
   const [step, setStep] = useState(0); // 0: review, 1: payment, 2: success
   const [loading, setLoading] = useState(false);
@@ -1522,7 +1531,7 @@ function PricingPageInline() {
 /* ============================================
    LEGAL PAGES
    ============================================ */
-function LegalPage({ type }: { type: 'terms' | 'privacy' }) {
+function LegalPageInline({ type }: { type: 'terms' | 'privacy' }) {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="p-8">
@@ -1573,7 +1582,7 @@ function LegalPage({ type }: { type: 'terms' | 'privacy' }) {
 /* ============================================
    AI CHAT WIDGET
    ============================================ */
-function AIChatWidget() {
+function AIChatWidgetInline() {
   const { chatOpen, toggleChat, chatMessages, addMessage } = useStore();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -1672,7 +1681,7 @@ function AIChatWidget() {
 /* ============================================
    SCHEMA PAGE (Database Visualization)
    ============================================ */
-function SchemaPage() {
+function SchemaPageInline() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const modelColors: Record<string, string> = {
@@ -1859,7 +1868,7 @@ function SchemaPage() {
 /* ============================================
    FOOTER
    ============================================ */
-function Footer() {
+function FooterInline() {
   const { setPage } = useStore();
   return (
     <footer className="bg-slate-900 text-slate-300 mt-auto">
