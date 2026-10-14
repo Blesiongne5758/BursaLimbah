@@ -7,7 +7,7 @@ import { useStore } from '../store';
 import { MOCK_LISTINGS, MOCK_USERS } from '../data';
 import { Card, Badge, Button } from '../components/ui';
 import { motion } from 'framer-motion';
-import { AlertCircle, Users, Package, TrendingUp, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Users, Package, TrendingUp, ShieldCheck, Settings } from 'lucide-react';
 
 export default function AdminPage() {
   const { setPage } = useStore();
@@ -19,9 +19,14 @@ export default function AdminPage() {
           <h1 className="font-display text-2xl font-bold text-slate-900">Admin Panel</h1>
           <p className="text-sm text-slate-600">Kelola platform BursaLimbah</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setPage('schema')}>
-          <Package className="w-4 h-4" /> Lihat Schema Database
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setPage('admin-config')}>
+            <Settings className="w-4 h-4" /> Konfigurasi
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setPage('schema')}>
+            <Package className="w-4 h-4" /> Schema Database
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}

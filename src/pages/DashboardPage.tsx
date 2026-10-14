@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useStore, useFeatureGate } from '../store';
 import { MOCK_LISTINGS, MOCK_TRANSACTIONS, formatRupiah, formatNumber } from '../data';
 import { WASTE_CATEGORIES, TRANSACTION_STATUS_COLORS } from '../types';
-import { Card, Badge, Button, StatCard, ProgressStepper } from '../components/ui';
+import { Card, Badge, Button, StatCard, ProgressStepper, Alert } from '../components/ui';
 import { motion } from 'framer-motion';
 import {
   BarChart3, Package, Calendar, Wallet, FileText, Settings,
@@ -25,7 +25,7 @@ export default function DashboardPage() {
     { id: 'overview', label: 'Ringkasan', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'listings', label: 'Listing', icon: <Package className="w-4 h-4" /> },
     { id: 'bookings', label: 'Booking', icon: <Calendar className="w-4 h-4" /> },
-    { id: 'wallet', label: 'Wallet', icon: <Wallet className="w-4 h-4" /> },
+    { id: 'wallet', label: 'Crypto Wallet', icon: <Wallet className="w-4 h-4" /> },
     { id: 'reports', label: 'Laporan', icon: <FileText className="w-4 h-4" /> },
     { id: 'settings', label: 'Pengaturan', icon: <Settings className="w-4 h-4" /> },
   ] as const;
@@ -237,11 +237,19 @@ function BookingsTab() {
 }
 
 function WalletTab() {
+  const { setPage } = useStore();
+  
   return (
     <div className="space-y-6">
+      <Alert type="info">
+        <p className="text-sm">
+          <strong>Blockchain Wallet:</strong> Kelola wallet crypto Anda untuk transaksi BLW token
+        </p>
+      </Alert>
+
       <div className="grid sm:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-6 text-white">
-          <p className="text-sm text-emerald-200">Saldo Tersedia</p>
+          <p className="text-sm text-emerald-200">Saldo Fiat</p>
           <p className="text-2xl font-bold mt-1">Rp 15.250.000</p>
           <Button
             variant="secondary"
@@ -251,26 +259,38 @@ function WalletTab() {
             Tarik Dana
           </Button>
         </div>
+        <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+          <p className="text-sm text-purple-200">BLW Token</p>
+          <p className="text-2xl font-bold mt-1">10,000 BLW</p>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="mt-4 bg-white/20 text-white hover:bg-white/30 border-0"
+            onClick={() => setPage('wallet')}
+          >
+            Kelola Wallet
+          </Button>
+        </div>
         <Card className="p-6">
           <p className="text-sm text-slate-600">Ditahan Escrow</p>
           <p className="text-2xl font-bold text-slate-900 mt-1">Rp 5.145.000</p>
           <p className="text-xs text-slate-500 mt-1">2 transaksi aktif</p>
         </Card>
-        <Card className="p-6">
-          <p className="text-sm text-slate-600">Total Pendapatan</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">Rp 48.750.000</p>
-          <p className="text-xs text-emerald-600 mt-1">+12% bulan ini</p>
-        </Card>
       </div>
 
       <Card className="p-6">
-        <h3 className="font-semibold text-slate-900 mb-4">Riwayat Transaksi</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-slate-900">Riwayat Transaksi</h3>
+          <Button variant="outline" size="sm" onClick={() => setPage('wallet')}>
+            Lihat Semua
+          </Button>
+        </div>
         <div className="space-y-3">
           {[
-            { type: 'in', desc: 'Pembayaran dari PT Green Cycle', amount: 8400000, date: '16 Nov 2024' },
-            { type: 'out', desc: 'Platform fee (2.5%)', amount: -210000, date: '16 Nov 2024' },
-            { type: 'in', desc: 'Pembayaran dari Ahmad Wijaya', amount: 8750000, date: '12 Nov 2024' },
-            { type: 'out', desc: 'Withdrawal ke BCA', amount: -10000000, date: '10 Nov 2024' },
+            { type: 'in', desc: 'Pembayaran dari PT Green Cycle', amount: 8400000, date: '16 Nov 2024', currency: 'IDR' },
+            { type: 'in', desc: 'Distribution BLW Token', amount: 5000, date: '15 Nov 2024', currency: 'BLW' },
+            { type: 'out', desc: 'Platform fee (2.5%)', amount: -210000, date: '16 Nov 2024', currency: 'IDR' },
+            { type: 'in', desc: 'Pembayaran dari Ahmad Wijaya', amount: 8750000, date: '12 Nov 2024', currency: 'IDR' },
           ].map((tx, i) => (
             <div key={i} className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
               <div className="flex items-center gap-3">
@@ -292,7 +312,10 @@ function WalletTab() {
               </div>
               <span className={`text-sm font-medium ${tx.amount > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                 {tx.amount > 0 ? '+' : ''}
-                {formatRupiah(Math.abs(tx.amount))}
+                {tx.currency === 'BLW' 
+                  ? `${Math.abs(tx.amount).toLocaleString()} BLW`
+                  : formatRupiah(Math.abs(tx.amount))
+                }
               </span>
             </div>
           ))}
