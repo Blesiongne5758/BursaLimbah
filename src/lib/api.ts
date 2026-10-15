@@ -209,6 +209,42 @@ export const api = {
       return response.data;
     },
   },
+
+  // File Upload
+  upload: {
+    presign: async (data: {
+      category: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+    }) => {
+      const response = await apiClient.post('/upload/presign', data);
+      return response.data;
+    },
+    confirm: async (data: {
+      key: string;
+      bucket: string;
+      originalName: string;
+      mimeType: string;
+      size: number;
+      category: string;
+    }) => {
+      const response = await apiClient.post('/upload/confirm', data);
+      return response.data;
+    },
+    getUrl: async (fileId: string) => {
+      const response = await apiClient.post('/upload/url', { fileId });
+      return response.data;
+    },
+    getFiles: async (category: string) => {
+      const response = await apiClient.get(`/upload/files/${category}`);
+      return response.data;
+    },
+    delete: async (fileId: string) => {
+      const response = await apiClient.delete(`/upload/${fileId}`);
+      return response.data;
+    },
+  },
 };
 
 export default api;

@@ -26,6 +26,7 @@ import chatRoutes from './routes/chat.routes';
 import kycRoutes from './routes/kyc.routes';
 import shippingRoutes from './routes/shipping.routes';
 import healthRoutes from './routes/health.routes';
+import uploadRoutes from './routes/upload.routes';
 
 // Import middleware
 import { attachFeatureFlags } from './middleware/featureFlag';
@@ -92,6 +93,9 @@ app.use(attachFeatureFlags);
 
 // Health check
 app.use('/api/health', healthRoutes);
+
+// File Upload
+app.use('/api/upload', uploadRoutes);
 
 // Authentication
 app.use('/api/auth', authRoutes);

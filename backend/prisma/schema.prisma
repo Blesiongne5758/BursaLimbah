@@ -93,6 +93,7 @@ model User {
   sellerBookings  Booking[]  @relation("SellerBookings")
   conversations   ConversationParticipant[]
   wallet          Wallet?
+  files           FileRecord[]
   
   // Timestamps
   createdAt       DateTime  @default(now())
@@ -376,5 +377,35 @@ model AuditLog {
   @@index([userId])
   @@index([action])
   @@index([resource])
+  @@index([createdAt])
+}
+
+// ============================================
+// FILE RECORDS (for cloud storage tracking)
+// ============================================
+
+model FileRecord {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  category            String   // listing, profile, kyc, chat, validation
+  bucket              String   // public, private
+  key                 String   @unique // S3 object key
+  originalName        String
+  mimeType            String
+  size                Int
+  
+  url                 String   // Public URL or empty for private files
+  thumbnailUrl        String?  // Cloudinary thumbnail URL
+  cloudinaryPublicId  String?  // Cloudinary public ID for transformations
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([bucket])
+  @@index([key])
   @@index([createdAt])
 }
