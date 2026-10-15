@@ -40,6 +40,8 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const AdminConfigPage = lazy(() => import('./pages/AdminConfigPage'));
+const WalletPage = lazy(() => import('./pages/WalletPage'));
 const KYCPage = lazy(() => import('./pages/KYCPage'));
 const PaymentPage = lazy(() => import('./pages/PaymentPage'));
 const SchemaPage = lazy(() => import('./pages/SchemaPage'));
@@ -93,19 +95,20 @@ export default function App() {
             className="flex-1"
           >
             <Suspense fallback={<LoadingFallback />}>
-              {currentPage === 'landing' && <LandingPage />}
-              {currentPage === 'marketplace' && <MarketplacePage />}
-              {currentPage === 'listing-detail' && <ListingDetailPage />}
-              {currentPage === 'dashboard' && <DashboardPage />}
-              {currentPage === 'auth' && <AuthPage />}
-              {currentPage === 'admin' && <AdminPage />}
-              {currentPage === 'pricing' && <PricingPage />}
-              {currentPage === 'kyc' && <KYCPage />}
-              {currentPage === 'payment' && <PaymentPage />}
-              {currentPage === 'schema' && <SchemaPage />}
-              {currentPage === 'terms' && <LegalPage type="terms" />}
-              {currentPage === 'privacy' && <LegalPage type="privacy" />}
-            </Suspense>
+          {currentPage === 'landing' && <LandingPage />}
+          {currentPage === 'marketplace' && <MarketplacePage />}
+          {currentPage === 'listing-detail' && <ListingDetailPage />}
+          {currentPage === 'dashboard' && <DashboardPage />}
+          {currentPage === 'auth' && <AuthPage />}
+          {currentPage === 'admin' && <AdminPage />}
+          {currentPage === 'admin-config' && <AdminConfigPage />}
+          {currentPage === 'wallet' && <WalletPage />}
+          {currentPage === 'pricing' && <PricingPage />}
+          {currentPage === 'kyc' && <KYCPage />}
+          {currentPage === 'payment' && <PaymentPage />}
+          {currentPage === 'schema' && <SchemaPage />}
+          {currentPage === 'terms' && <LegalPage type="terms" />}
+          {currentPage === 'privacy' && <LegalPage type="privacy" />}            </Suspense>
           </motion.main>
         </AnimatePresence>
         <AIChatWidget />
@@ -141,7 +144,13 @@ function NavbarInline() {
             <NavLink active={currentPage === 'marketplace'} onClick={() => setPage('marketplace')}>Marketplace</NavLink>
             <NavLink active={currentPage === 'pricing'} onClick={() => setPage('pricing')}>Harga</NavLink>
             {isAuthenticated && <NavLink active={currentPage === 'dashboard'} onClick={() => setPage('dashboard')}>Dashboard</NavLink>}
-            {currentUser?.role === 'ADMIN' && <NavLink active={currentPage === 'admin'} onClick={() => setPage('admin')}>Admin</NavLink>}
+            {isAuthenticated && <NavLink active={currentPage === 'wallet'} onClick={() => setPage('wallet')}>Wallet</NavLink>}
+            {currentUser?.role === 'ADMIN' && (
+              <>
+                <NavLink active={currentPage === 'admin'} onClick={() => setPage('admin')}>Admin</NavLink>
+                <NavLink active={currentPage === 'admin-config'} onClick={() => setPage('admin-config')}>Config</NavLink>
+              </>
+            )}
           </div>
 
           <div className="hidden md:flex items-center gap-3">

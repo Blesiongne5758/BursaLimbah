@@ -73,4 +73,13 @@ export const config = {
   sentry: {
     dsn: process.env.SENTRY_DSN || '',
   },
+
+  // AWS S3
+  aws: {
+    region: process.env.AWS_REGION || 'ap-southeast-1',
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    publicBucket: process.env.AWS_PUBLIC_BUCKET || 'bursalimbah-public',
+    privateBucket: process.env.AWS_PRIVATE_BUCKET || 'bursalimbah-private',
+  },
 };
