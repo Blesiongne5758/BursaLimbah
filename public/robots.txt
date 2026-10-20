@@ -1,0 +1,42 @@
+# Robots.txt for BursaLimbah.com
+# https://bursalimbah.com/robots.txt
+
+# Allow all crawlers by default
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /admin/
+Disallow: /admin-config
+Disallow: /test-connection
+Disallow: /payment/
+Disallow: /payment-result
+Disallow: /api/
+Disallow: /*?*
+
+# Allow important pages
+Allow: /marketplace
+Allow: /pricing
+Allow: /auth
+Allow: /terms
+Allow: /privacy
+Allow: /schema
+
+# Sitemap location
+Sitemap: https://bursalimbah.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2

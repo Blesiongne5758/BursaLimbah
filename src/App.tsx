@@ -47,6 +47,7 @@ const PaymentPage = lazy(() => import('./pages/PaymentPage'));
 const SchemaPage = lazy(() => import('./pages/SchemaPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const TestConnectionPage = lazy(() => import('./pages/TestConnectionPage'));
+const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
 
 // Lazy load shared components
 const Navbar = lazy(() => import('./components/Navbar'));
@@ -67,6 +68,7 @@ export default function App() {
     pricing: { title: 'Harga & Paket', description: 'Pilih paket membership yang sesuai dengan bisnis Anda.' },
     kyc: { title: 'Verifikasi KYC', description: 'Lengkapi verifikasi identitas untuk mengakses fitur lengkap.' },
     payment: { title: 'Pembayaran', description: 'Proses pembayaran dengan escrow yang aman.' },
+    'payment-result': { title: 'Status Pembayaran', description: 'Cek status pembayaran transaksi Anda di BursaLimbah.' },
     schema: { title: 'Database Schema', description: 'Visualisasi skema database PostgreSQL BursaLimbah.' },
     terms: { title: 'Syarat & Ketentuan', description: 'Syarat dan ketentuan penggunaan platform BursaLimbah.' },
     privacy: { title: 'Kebijakan Privasi', description: 'Kebijakan privasi compliant dengan UU PDP No. 27/2023.' },
@@ -109,6 +111,7 @@ export default function App() {
           {currentPage === 'pricing' && <PricingPage />}
           {currentPage === 'kyc' && <KYCPage />}
           {currentPage === 'payment' && <PaymentPage />}
+          {currentPage === 'payment-result' && <PaymentResultPage />}
           {currentPage === 'schema' && <SchemaPage />}
           {currentPage === 'terms' && <LegalPage type="terms" />}
           {currentPage === 'privacy' && <LegalPage type="privacy" />}            </Suspense>
