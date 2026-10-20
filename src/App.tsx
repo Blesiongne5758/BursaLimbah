@@ -46,6 +46,7 @@ const KYCPage = lazy(() => import('./pages/KYCPage'));
 const PaymentPage = lazy(() => import('./pages/PaymentPage'));
 const SchemaPage = lazy(() => import('./pages/SchemaPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
+const TestConnectionPage = lazy(() => import('./pages/TestConnectionPage'));
 
 // Lazy load shared components
 const Navbar = lazy(() => import('./components/Navbar'));
@@ -69,6 +70,7 @@ export default function App() {
     schema: { title: 'Database Schema', description: 'Visualisasi skema database PostgreSQL BursaLimbah.' },
     terms: { title: 'Syarat & Ketentuan', description: 'Syarat dan ketentuan penggunaan platform BursaLimbah.' },
     privacy: { title: 'Kebijakan Privasi', description: 'Kebijakan privasi compliant dengan UU PDP No. 27/2023.' },
+    'test-connection': { title: 'Test Koneksi', description: 'Verifikasi koneksi ke Supabase dan Cloudinary.' },
   };
 
   const currentSEO = seoConfig[currentPage] || seoConfig.landing;
@@ -102,6 +104,7 @@ export default function App() {
           {currentPage === 'auth' && <AuthPage />}
           {currentPage === 'admin' && <AdminPage />}
           {currentPage === 'admin-config' && <AdminConfigPage />}
+          {currentPage === 'test-connection' && <TestConnectionPage />}
           {currentPage === 'wallet' && <WalletPage />}
           {currentPage === 'pricing' && <PricingPage />}
           {currentPage === 'kyc' && <KYCPage />}

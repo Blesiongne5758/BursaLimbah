@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { User, MembershipTier, ChatMessage } from './types';
 import { MOCK_CHAT_MESSAGES } from './data';
 
-type Page = 'landing' | 'marketplace' | 'listing-detail' | 'dashboard' | 'auth' | 'admin' | 'admin-config' | 'wallet' | 'pricing' | 'kyc' | 'payment' | 'schema' | 'terms' | 'privacy';
+type Page = 'landing' | 'marketplace' | 'listing-detail' | 'dashboard' | 'auth' | 'admin' | 'admin-config' | 'test-connection' | 'wallet' | 'pricing' | 'kyc' | 'payment' | 'schema' | 'terms' | 'privacy';
 
 interface AppState {
   // Navigation
