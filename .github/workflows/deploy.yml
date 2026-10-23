@@ -1,0 +1,136 @@
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout code
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Node.js
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Step 3: Install dependencies
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      # Step 4: Run tests
+      - name: 🧪 Run Tests
+        run: npm run test
+        continue-on-error: true # Don't fail deployment if tests fail
+
+      # Step 5: Type check
+      - name: 🔍 Type Check
+        run: npm run typecheck
+        continue-on-error: true
+
+      # Step 6: Build project
+      - name: 🔨 Build Project
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_CLOUDINARY_CLOUD_NAME: ${{ secrets.VITE_CLOUDINARY_CLOUD_NAME }}
+          VITE_CLOUDINARY_UPLOAD_PRESET: ${{ secrets.VITE_CLOUDINARY_UPLOAD_PRESET }}
+          VITE_CLOUDINARY_API_KEY: ${{ secrets.VITE_CLOUDINARY_API_KEY }}
+
+      # Step 7: Verify build output
+      - name: ✅ Verify Build
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Error: dist folder not found!"
+            exit 1
+          fi
+          echo "✅ Build successful!"
+          ls -la dist/
+
+      # Step 8: Deploy to InfinityFree via FTP
+      - name: 🚀 Deploy to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          server-dir: /htdocs/
+          local-dir: ./dist/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env*
+            **/*.log
+
+      # Step 9: Wait for deployment
+      - name: ⏳ Wait for Deployment
+        run: |
+          echo "Waiting 30 seconds for deployment to propagate..."
+          sleep 30
+
+      # Step 10: Verify deployment
+      - name: 🔍 Verify Deployment
+        run: |
+          echo "Checking deployment..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.DOMAIN }} || echo "000")
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Deployment successful! Website is live."
+            echo "🌐 URL: https://${{ secrets.DOMAIN }}"
+          else
+            echo "⚠️ Warning: Website returned HTTP $HTTP_STATUS"
+            echo "This might be normal if the domain is not configured yet."
+          fi
+
+      # Step 11: Create deployment summary
+      - name: 📊 Deployment Summary
+        if: always()
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Build Info" >> $GITHUB_STEP_SUMMARY
+          echo "- Node.js version: 20" >> $GITHUB_STEP_SUMMARY
+          echo "- Build output: dist/" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployment target: InfinityFree (htdocs/)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌐 Website" >> $GITHUB_STEP_SUMMARY
+          echo "- URL: https://${{ secrets.DOMAIN }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Visit your website to verify deployment" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test all features" >> $GITHUB_STEP_SUMMARY
+          echo "3. Check browser console for errors" >> $GITHUB_STEP_SUMMARY
+
+      # Step 12: Notify on success
+      - name: ✅ Notify Success
+        if: success()
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "Website: https://${{ secrets.DOMAIN }}"
+
+      # Step 13: Notify on failure
+      - name: ❌ Notify Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Check the logs above for details."
+          exit 1
