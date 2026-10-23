@@ -15,6 +15,27 @@ BursaLimbah.com adalah platform marketplace yang mempertemukan penjual dan pembe
 ![Performance](https://img.shields.io/badge/performance-10/10-green?style=for-the-badge)
 ![Architecture](https://img.shields.io/badge/architecture-modular-blue?style=for-the-badge)
 
+## 🚀 Quick Deploy
+
+### Option 1: InfinityFree + Supabase + Cloudinary (FREE)
+```bash
+# 1. Setup Supabase & Cloudinary (see guides below)
+# 2. Configure .env file
+# 3. Build & Deploy
+npm install
+npm run build
+# Upload dist/ folder to InfinityFree
+```
+📖 **Full Guide:** [QUICK_START.md](./QUICK_START.md) | [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) | [CLOUDINARY_SETUP.md](./CLOUDINARY_SETUP.md)
+
+### Option 2: Vercel + Supabase + Cloudinary
+```bash
+npm install
+npm run build
+vercel --prod
+```
+📖 **Full Guide:** [DEPLOYMENT.md](./DEPLOYMENT.md)
+
 ## ✨ Fitur Utama
 
 ### 🏪 Marketplace

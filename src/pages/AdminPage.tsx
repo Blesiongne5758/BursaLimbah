@@ -7,7 +7,7 @@ import { useStore } from '../store';
 import { MOCK_LISTINGS, MOCK_USERS } from '../data';
 import { Card, Badge, Button } from '../components/ui';
 import { motion } from 'framer-motion';
-import { AlertCircle, Users, Package, TrendingUp, ShieldCheck, Settings } from 'lucide-react';
+import { AlertCircle, Users, Package, TrendingUp, ShieldCheck, Settings, Wifi } from 'lucide-react';
 
 export default function AdminPage() {
   const { setPage } = useStore();
@@ -20,6 +20,9 @@ export default function AdminPage() {
           <p className="text-sm text-slate-600">Kelola platform BursaLimbah</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setPage('test-connection')}>
+            <Wifi className="w-4 h-4" /> Test Koneksi
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setPage('admin-config')}>
             <Settings className="w-4 h-4" /> Konfigurasi
           </Button>

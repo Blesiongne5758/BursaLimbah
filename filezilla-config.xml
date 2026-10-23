@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FileZilla3 version="3.66.0" platform="windows">
+	<Servers>
+		<Server>
+			<Host>ftpupload.net</Host>
+			<Port>21</Port>
+			<Protocol>0</Protocol>
+			<Type>0</Type>
+			<User>if0_43249513</User>
+			<Pass>N0m4d3n0</Pass>
+			<Logontype>1</Logontype>
+			<TimezoneOffset>0</TimezoneOffset>
+			<PasvMode>ModeDefault</PasvMode>
+			<MaximumMultipleConnections>0</MaximumMultipleConnections>
+			<EncodingType>Auto</EncodingType>
+			<BypassProxy>0</BypassProxy>
+			<Name>BursaLimbah - InfinityFree</Name>
+			<Comments>Deployment target: htdocs/</Comments>
+			<LocalDir>dist/</LocalDir>
+			<RemoteDir>htdocs</RemoteDir>
+			<SyncBrowsing>0</SyncBrowsing>
+		</Server>
+	</Servers>
+</FileZilla3>

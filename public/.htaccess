@@ -1,0 +1,95 @@
+# InfinityFree .htaccess configuration for React SPA
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Set base directory
+RewriteBase /
+
+# Redirect all requests to index.html (except for existing files and directories)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Security headers
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Permissions policy
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    # Compress HTML, CSS, JavaScript, Text, XML and fonts
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE font/otf
+    AddOutputFilterByType DEFLATE font/ttf
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+</IfModule>
+
+# Browser caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Default cache duration
+    ExpiresDefault "access plus 1 month"
+    
+    # HTML
+    ExpiresByType text/html "access plus 0 seconds"
+    
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    
+    # Images
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    
+    # Fonts
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "(\.env|\.git|\.htaccess|composer\.json|package\.json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Custom error pages
+ErrorDocument 404 /index.html
+ErrorDocument 403 /index.html
+ErrorDocument 500 /index.html
